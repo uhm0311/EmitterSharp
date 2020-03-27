@@ -1,34 +1,55 @@
 ﻿using SimpleThreadMonitor;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace EventEmitterSharp
 {
     /// <summary>
-    /// C# implementation of <see href="https://github.com/socketio/engine.io-client-java/blob/master/src/main/java/io/socket/emitter/Emitter.java">Emitter</see>.
+    /// C# implementation of <see href="https://github.com/component/emitter">Emitter in JavaScript module</see>.
     /// </summary>
-    public abstract class SimpleEventEmitter<E, T>
+    public abstract class Emitter<E, T>
     {
-        private readonly ConcurrentDictionary<E, List<SimpleEventListener<T>>> EventListeners = new ConcurrentDictionary<E, List<SimpleEventListener<T>>>();
+        private readonly ConcurrentDictionary<E, List<Listener<T>>> EventListeners = new ConcurrentDictionary<E, List<Listener<T>>>();
         private readonly object EventMutex = new object();
 
-        public SimpleEventEmitter<E, T> On(E Event, SimpleListenerAction<T> Callback)
+        public Emitter<E, T> On(E Event, Action<T> Callback)
         {
             return AddEventListener(Event, Callback, false);
         }
 
-        public SimpleEventEmitter<E, T> Once(E Event, SimpleListenerAction<T> Callback)
+        public Emitter<E, T> On(E Event, Action Callback)
+        {
+            return AddEventListener(Event, Callback, false);
+        }
+
+        public Emitter<E, T> Once(E Event, Action<T> Callback)
         {
             return AddEventListener(Event, Callback, true);
         }
 
-        private SimpleEventEmitter<E, T> AddEventListener(E Event, SimpleListenerAction<T> Callback, bool Once)
+        public Emitter<E, T> Once(E Event, Action Callback)
+        {
+            return AddEventListener(Event, Callback, true);
+        }
+
+        private Emitter<E, T> AddEventListener(E Event, Delegate Callback, bool Once)
         {
             if (Event != null && Callback != null)
             {
-                SimpleEventListener<T> Listener = new SimpleEventListener<T>(Callback, Once);
+                Listener<T> Listener;
 
-                EventListeners.AddOrUpdate(Event, (_) => new List<SimpleEventListener<T>>() { Listener }, (_, Listeners) =>
+                if (Callback is Action)
+                {
+                    Listener = new Listener<T>(Callback as Action, Once);
+                }
+                else
+                {
+                    Listener = new Listener<T>(Callback as Action<T>, Once);
+                }
+
+                EventListeners.AddOrUpdate(Event, (_) => new List<Listener<T>>() { Listener }, (_, Listeners) =>
                 {
                     SimpleMutex.Lock(EventMutex, () => Listeners.Add(Listener));
 
@@ -39,14 +60,24 @@ namespace EventEmitterSharp
             return this;
         }
 
-        public SimpleEventEmitter<E, T> Off()
+        public Emitter<E, T> Off()
         {
             EventListeners.Clear();
 
             return this;
         }
 
-        public SimpleEventEmitter<E, T> Off(E Event, SimpleListenerAction<T> Callback = null, bool Backward = false)
+        public Emitter<E, T> Off(E Event, Action<T> Callback = null, bool Backward = false)
+        {
+            return RemoveListener(Event, Callback, Backward);
+        }
+
+        public Emitter<E, T> Off(E Event, Action Callback = null, bool Backward = false)
+        {
+            return RemoveListener(Event, Callback, Backward);
+        }
+
+        private Emitter<E, T> RemoveListener(E Event, Delegate Callback, bool Backward)
         {
             if (Event != null)
             {
@@ -56,7 +87,7 @@ namespace EventEmitterSharp
                 }
                 else
                 {
-                    if (EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners))
+                    if (EventListeners.TryGetValue(Event, out List<Listener<T>> Listeners))
                     {
                         SimpleMutex.Lock(EventMutex, () =>
                         {
@@ -90,24 +121,24 @@ namespace EventEmitterSharp
             return this;
         }
 
-        public SimpleEventEmitter<E, T> Emit(E Event, T Argument)
+        public Emitter<E, T> Emit(E Event, [Optional] T Argument)
         {
             if (Event != null)
             {
-                if (EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners))
+                if (EventListeners.TryGetValue(Event, out List<Listener<T>> Listeners))
                 {
                     for (int i = Listeners.Count - 1; i >= 0; i--)
                     {
                         SimpleMutex.Lock(EventMutex, () =>
                         {
-                            SimpleEventListener<T> EventListener = Listeners[i];
+                            Listener<T> EventListener = Listeners[i];
 
                             if (EventListener.Once)
                             {
                                 Listeners.RemoveAt(i);
                             }
 
-                            EventListener.Callback(Argument);
+                            EventListener.Invoke(Argument);
                         });
                     }
                 }
@@ -116,13 +147,13 @@ namespace EventEmitterSharp
             return this;
         }
 
-        public List<SimpleListenerAction<T>> GetListeners(E Event)
+        public List<Delegate> GetListeners(E Event)
         {
-            List<SimpleListenerAction<T>> Result = new List<SimpleListenerAction<T>>();
+            List<Delegate> Result = new List<Delegate>();
 
-            if (Event != null && EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners))
+            if (Event != null && EventListeners.TryGetValue(Event, out List<Listener<T>> Listeners))
             {
-                foreach (SimpleEventListener<T> Listener in Listeners)
+                foreach (Listener<T> Listener in Listeners)
                 {
                     Result.Add(Listener.Callback);
                 }
@@ -133,7 +164,7 @@ namespace EventEmitterSharp
 
         public bool HasListeners(E Event)
         {
-            return Event != null && EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners) && Listeners.Count > 0;
+            return Event != null && EventListeners.TryGetValue(Event, out List<Listener<T>> Listeners) && Listeners.Count > 0;
         }
     }
 }
