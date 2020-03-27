@@ -26,7 +26,19 @@ namespace EmitterSharp
 
         public void Invoke([Optional] T Argument)
         {
-            Callback.DynamicInvoke(Argument);
+            bool IsGenericAction = Callback is Action<T>;
+
+            if (IsGenericAction || Callback is Action)
+            {
+                if (IsGenericAction)
+                {
+                    (Callback as Action<T>).Invoke(Argument);
+                }
+                else
+                {
+                    (Callback as Action).Invoke();
+                }
+            }
         }
 
         public override bool Equals(object Object)
@@ -35,7 +47,7 @@ namespace EmitterSharp
             {
                 Listener<T> Temp = Object as Listener<T>;
 
-                return Callback.Equals(Temp.Callback) && Once.Equals(Temp.Once);
+                return Once.Equals(Temp.Once) && Callback.Equals(Temp.Callback);
             }
 
             return false;

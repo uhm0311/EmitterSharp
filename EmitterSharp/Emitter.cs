@@ -60,12 +60,17 @@ namespace EmitterSharp
             return this;
         }
 
-        public Emitter<E, T> Off(E Event, Action<T> Callback = null, bool Backward = false)
+        public Emitter<E, T> Off(E Event, bool Backward = false)
+        {
+            return RemoveListener(Event, null, Backward);
+        }
+
+        public Emitter<E, T> Off(E Event, Action<T> Callback, bool Backward = false)
         {
             return RemoveListener(Event, Callback, Backward);
         }
 
-        public Emitter<E, T> Off(E Event, Action Callback = null, bool Backward = false)
+        public Emitter<E, T> Off(E Event, Action Callback, bool Backward = false)
         {
             return RemoveListener(Event, Callback, Backward);
         }
@@ -120,20 +125,20 @@ namespace EmitterSharp
             {
                 if (this.Listeners.TryGetValue(Event, out List<Listener<T>> Listeners))
                 {
-                    for (int i = Listeners.Count - 1; i >= 0; i--)
+                    SimpleMutex.Lock(EventMutex, () =>
                     {
-                        SimpleMutex.Lock(EventMutex, () =>
+                        for (int i = 0; i < Listeners.Count; i++)
                         {
                             Listener<T> Listener = Listeners[i];
 
                             if (Listener.Once)
                             {
-                                Listeners.RemoveAt(i);
+                                Listeners.RemoveAt(i--);
                             }
 
                             Listener.Invoke(Argument);
-                        });
-                    }
+                        }
+                    });
                 }
             }
 
