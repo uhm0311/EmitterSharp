@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace EventEmitterSharp
+namespace EmitterSharp
 {
     /// <summary>
     /// C# implementation of <see href="https://github.com/component/emitter">Emitter</see> in JavaScript module.

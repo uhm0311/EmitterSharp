@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace EventEmitterSharp
+namespace EmitterSharp
 {
     internal class Listener<T>
     {
