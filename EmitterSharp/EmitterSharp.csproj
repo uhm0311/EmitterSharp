@@ -3,21 +3,21 @@
   <PropertyGroup>
   <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net40;netstandard2.0</TargetFrameworks>
   <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
-  <RootNamespace>EventEmitterSharp</RootNamespace>
-    <AssemblyName>EventEmitterSharp</AssemblyName>
+  <RootNamespace>EmitterSharp</RootNamespace>
+    <AssemblyName>EmitterSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
   <Authors>uhm0311</Authors>
   <Company>uhm0311</Company>
-  <Title>EventEmitter</Title>
+  <Title>Emitter</Title>
   <Copyright>Copyright (c) 2020 uhm0311</Copyright>
-  <Description>C# implementation of EventEmitter protocol client and server.</Description>
-  <PackageId>EventEmitterSharp</PackageId>
-    <PackageTags>EventEmitter</PackageTags>
-    <PackageProjectUrl>https://github.com/uhm0311/EventEmitterSharp</PackageProjectUrl>
+  <Description>C# implementation of Emitter in JavaScript module. See https://github.com/component/emitter for details.</Description>
+  <PackageId>EmitterSharp</PackageId>
+    <PackageTags>Emitter</PackageTags>
+    <PackageProjectUrl>https://github.com/uhm0311/EmitterSharp</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/uhm0311/EventEmitterSharp.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/uhm0311/EmitterSharp.git</RepositoryUrl>
   <MinClientVersion>2.12</MinClientVersion>
   <PackageVersion>1.0.0</PackageVersion>
   <PackageReleaseNotes>First release.</PackageReleaseNotes>
