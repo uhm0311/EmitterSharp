@@ -1,2 +1,2 @@
-# EventEmitterSharp
-Simplified C# implementation of EventEmitter in Node.js
+# EmitterSharp
+C# implementation of Emitter in JavaScript module. See https://github.com/component/emitter for details.
