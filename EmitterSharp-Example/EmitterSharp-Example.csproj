@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EmitterSharp\EmitterSharp.csproj">
+      <Project>{3125d33e-71f6-46b3-bb34-d563176bdab0}</Project>
+      <Name>EmitterSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
