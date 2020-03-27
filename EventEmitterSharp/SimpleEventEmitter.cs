@@ -26,9 +26,11 @@ namespace EventEmitterSharp
         {
             if (Event != null && Callback != null)
             {
-                EventListeners.AddOrUpdate(Event, (_) => new List<SimpleEventListener<T>>(), (_, Listeners) =>
+                SimpleEventListener<T> Listener = new SimpleEventListener<T>(Callback, Once);
+
+                EventListeners.AddOrUpdate(Event, (_) => new List<SimpleEventListener<T>>() { Listener }, (_, Listeners) =>
                 {
-                    SimpleMutex.Lock(EventMutex, () => Listeners.Add(new SimpleEventListener<T>(Callback, Once)));
+                    SimpleMutex.Lock(EventMutex, () => Listeners.Add(Listener));
 
                     return Listeners;
                 });
