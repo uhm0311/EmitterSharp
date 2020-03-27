@@ -1,25 +1,25 @@
 ﻿namespace EventEmitterSharp
 {
-    public delegate void SimpleListenerAction(params object[] Arguments);
+    public delegate void SimpleListenerAction<T>(T Arguments);
 
-    public class SimpleEventListener
+    public class SimpleEventListener<T>
     {
-        public SimpleListenerAction Callback { get; private set; }
+        public SimpleListenerAction<T> Callback { get; private set; }
         public bool Once { get; private set; }
 
-        internal SimpleEventListener(SimpleListenerAction Callback, bool Once = false)
+        internal SimpleEventListener(SimpleListenerAction<T> Callback, bool Once = false)
         {
             this.Callback = Callback;
             this.Once = Once;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object Object)
         {
-            if (obj is SimpleEventListener)
+            if (Object is SimpleEventListener<T>)
             {
-                SimpleEventListener o = obj as SimpleEventListener;
+                SimpleEventListener<T> Temp = Object as SimpleEventListener<T>;
 
-                return Callback.Equals(o.Callback) && Once.Equals(o.Once);
+                return Callback.Equals(Temp.Callback) && Once.Equals(Temp.Once);
             }
 
             return false;

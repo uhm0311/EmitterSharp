@@ -22,4 +22,7 @@
   <PackageVersion>1.0.0</PackageVersion>
   <PackageReleaseNotes>First release.</PackageReleaseNotes>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SimpleThreadMonitor" Version="1.0.2" />
+  </ItemGroup>
 </Project>

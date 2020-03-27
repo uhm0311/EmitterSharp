@@ -1,75 +1,137 @@
-﻿using System.Collections.Concurrent;
+﻿using SimpleThreadMonitor;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace EventEmitterSharp
 {
-    public abstract class SimpleEventEmitter
+    /// <summary>
+    /// C# implementation of <see href="https://github.com/socketio/engine.io-client-java/blob/master/src/main/java/io/socket/emitter/Emitter.java">Emitter</see>.
+    /// </summary>
+    public abstract class SimpleEventEmitter<E, T>
     {
-        private readonly ConcurrentDictionary<object, List<SimpleEventListener>> EventListeners = new ConcurrentDictionary<object, List<SimpleEventListener>>();
+        private readonly ConcurrentDictionary<E, List<SimpleEventListener<T>>> EventListeners = new ConcurrentDictionary<E, List<SimpleEventListener<T>>>();
+        private readonly object EventMutex = new object();
 
-        public void On(object Event, SimpleListenerAction Callback)
+        public SimpleEventEmitter<E, T> On(E Event, SimpleListenerAction<T> Callback)
         {
-            AddEventListener(Event, Callback, false);
+            return AddEventListener(Event, Callback, false);
         }
 
-        public void Once(object Event, SimpleListenerAction Callback)
+        public SimpleEventEmitter<E, T> Once(E Event, SimpleListenerAction<T> Callback)
         {
-            AddEventListener(Event, Callback, true);
+            return AddEventListener(Event, Callback, true);
         }
 
-        private void AddEventListener(object Event, SimpleListenerAction Callback, bool Once = false)
+        private SimpleEventEmitter<E, T> AddEventListener(E Event, SimpleListenerAction<T> Callback, bool Once)
         {
-            if (IsValid(Event, Callback))
+            if (Event != null && Callback != null)
             {
-                if (!EventListeners.ContainsKey(Event))
+                EventListeners.AddOrUpdate(Event, (_) => new List<SimpleEventListener<T>>(), (_, Listeners) =>
                 {
-                    EventListeners.TryAdd(Event, new List<SimpleEventListener>());
-                }
+                    SimpleMutex.Lock(EventMutex, () => Listeners.Add(new SimpleEventListener<T>(Callback, Once)));
 
-                EventListeners[Event].Add(new SimpleEventListener(Callback, Once));
+                    return Listeners;
+                });
             }
+
+            return this;
         }
 
-        public void Off(object Event, SimpleListenerAction Callback)
+        public SimpleEventEmitter<E, T> Off()
         {
-            if (IsValid(Event, Callback) && EventListeners.ContainsKey(Event))
-            {
-                for (int i = EventListeners[Event].Count - 1; i >= 0; i--)
-                {
-                    if (EventListeners[Event][i].Callback.Equals(Callback))
-                    {
-                        EventListeners[Event].RemoveAt(i);
-                        return;
-                    }
-                }
-            }
+            EventListeners.Clear();
+
+            return this;
         }
 
-        protected void Emit(object Event, params object[] Arguments)
+        public SimpleEventEmitter<E, T> Off(E Event, SimpleListenerAction<T> Callback = null, bool Backward = false)
         {
             if (Event != null)
             {
-                if (EventListeners.ContainsKey(Event))
+                if (Callback == null)
                 {
-                    for (int i = EventListeners[Event].Count - 1; i >= 0; i--)
+                    EventListeners.TryRemove(Event, out _);
+                }
+                else
+                {
+                    if (EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners))
                     {
-                        SimpleEventListener EventListener = EventListeners[Event][i];
-
-                        if (EventListener.Once)
+                        SimpleMutex.Lock(EventMutex, () =>
                         {
-                            EventListeners[Event].RemoveAt(i);
-                        }
-
-                        try { EventListener.Callback(Arguments); }
-                        catch { }
+                            if (!Backward)
+                            {
+                                for (int i = 0; i < Listeners.Count; i++)
+                                {
+                                    if (Listeners[i].Callback.Equals(Callback))
+                                    {
+                                        Listeners.RemoveAt(i);
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (int i = Listeners.Count - 1; i >= 0; i--)
+                                {
+                                    if (Listeners[i].Callback.Equals(Callback))
+                                    {
+                                        Listeners.RemoveAt(i);
+                                        break;
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
             }
+
+            return this;
         }
 
-        private bool IsValid(object Event, SimpleListenerAction Callback)
+        public SimpleEventEmitter<E, T> Emit(E Event, T Argument)
         {
-            return Event != null && Callback != null;
+            if (Event != null)
+            {
+                if (EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners))
+                {
+                    for (int i = Listeners.Count - 1; i >= 0; i--)
+                    {
+                        SimpleMutex.Lock(EventMutex, () =>
+                        {
+                            SimpleEventListener<T> EventListener = Listeners[i];
+
+                            if (EventListener.Once)
+                            {
+                                Listeners.RemoveAt(i);
+                            }
+
+                            EventListener.Callback(Argument);
+                        });
+                    }
+                }
+            }
+
+            return this;
+        }
+
+        public List<SimpleListenerAction<T>> GetListeners(E Event)
+        {
+            List<SimpleListenerAction<T>> Result = new List<SimpleListenerAction<T>>();
+
+            if (Event != null && EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners))
+            {
+                foreach (SimpleEventListener<T> Listener in Listeners)
+                {
+                    Result.Add(Listener.Callback);
+                }
+            }
+
+            return Result;
+        }
+
+        public bool HasListeners(E Event)
+        {
+            return Event != null && EventListeners.TryGetValue(Event, out List<SimpleEventListener<T>> Listeners) && Listeners.Count > 0;
         }
     }
 }
