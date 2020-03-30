@@ -19,8 +19,8 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/uhm0311/EmitterSharp.git</RepositoryUrl>
   <MinClientVersion>2.12</MinClientVersion>
-  <PackageVersion>1.0.0</PackageVersion>
-  <PackageReleaseNotes>First release.</PackageReleaseNotes>
+  <PackageVersion>1.1.0</PackageVersion>
+  <PackageReleaseNotes>Improve chaining and generic type name.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SimpleThreadMonitor" Version="1.0.2" />
