@@ -9,40 +9,48 @@ namespace EmitterSharp
     /// <summary>
     /// C# implementation of <see href="https://github.com/component/emitter">Emitter</see> in JavaScript module.
     /// </summary>
-    public abstract class Emitter<E, T>
+    public abstract class Emitter<TChildClass, TEvent, TArgument> where TChildClass : Emitter<TChildClass, TEvent, TArgument>
     {
-        private readonly ConcurrentDictionary<E, List<Listener<T>>> Listeners = new ConcurrentDictionary<E, List<Listener<T>>>();
+        private readonly ConcurrentDictionary<TEvent, List<Listener<TArgument>>> Listeners = new ConcurrentDictionary<TEvent, List<Listener<TArgument>>>();
         private readonly object EventMutex = new object();
 
-        public Emitter<E, T> On(E Event, Action<T> Callback)
+        protected Emitter()
+        {
+            if (!typeof(TChildClass).Equals(GetType()))
+            {
+                throw new ArgumentException(string.Format(@"'{0}' does not match with '{1}'.", GetType().Name, typeof(TChildClass).Name));
+            }
+        }
+
+        public TChildClass On(TEvent Event, Action<TArgument> Callback)
         {
             return AddListener(Event, Callback, false);
         }
 
-        public Emitter<E, T> On(E Event, Action Callback)
+        public TChildClass On(TEvent Event, Action Callback)
         {
             return AddListener(Event, Callback, false);
         }
 
-        public Emitter<E, T> Once(E Event, Action<T> Callback)
+        public TChildClass Once(TEvent Event, Action<TArgument> Callback)
         {
             return AddListener(Event, Callback, true);
         }
 
-        public Emitter<E, T> Once(E Event, Action Callback)
+        public TChildClass Once(TEvent Event, Action Callback)
         {
             return AddListener(Event, Callback, true);
         }
 
-        private Emitter<E, T> AddListener(E Event, Delegate Callback, bool Once)
+        private TChildClass AddListener(TEvent Event, Delegate Callback, bool Once)
         {
-            bool IsGenericAction = Callback is Action<T>;
+            bool IsGenericAction = Callback is Action<TArgument>;
 
             if (Event != null && (IsGenericAction || Callback is Action))
             {
-                Listener<T> Listener = IsGenericAction ? new Listener<T>(Callback as Action<T>, Once) : new Listener<T>(Callback as Action, Once);
+                Listener<TArgument> Listener = IsGenericAction ? new Listener<TArgument>(Callback as Action<TArgument>, Once) : new Listener<TArgument>(Callback as Action, Once);
 
-                Listeners.AddOrUpdate(Event, (_) => new List<Listener<T>>() { Listener }, (_, Listeners) =>
+                Listeners.AddOrUpdate(Event, (_) => new List<Listener<TArgument>>() { Listener }, (_, Listeners) =>
                 {
                     SimpleMutex.Lock(EventMutex, () => Listeners.Add(Listener));
 
@@ -50,32 +58,32 @@ namespace EmitterSharp
                 });
             }
 
-            return this;
+            return this as TChildClass;
         }
 
-        public Emitter<E, T> Off()
+        public TChildClass Off()
         {
             Listeners.Clear();
 
-            return this;
+            return this as TChildClass;
         }
 
-        public Emitter<E, T> Off(E Event, bool Backward = false)
+        public TChildClass Off(TEvent Event, bool Backward = false)
         {
             return RemoveListener(Event, null, Backward);
         }
 
-        public Emitter<E, T> Off(E Event, Action<T> Callback, bool Backward = false)
+        public TChildClass Off(TEvent Event, Action<TArgument> Callback, bool Backward = false)
         {
             return RemoveListener(Event, Callback, Backward);
         }
 
-        public Emitter<E, T> Off(E Event, Action Callback, bool Backward = false)
+        public TChildClass Off(TEvent Event, Action Callback, bool Backward = false)
         {
             return RemoveListener(Event, Callback, Backward);
         }
 
-        private Emitter<E, T> RemoveListener(E Event, Delegate Callback, bool Backward)
+        private TChildClass RemoveListener(TEvent Event, Delegate Callback, bool Backward)
         {
             if (Event != null)
             {
@@ -85,7 +93,7 @@ namespace EmitterSharp
                 }
                 else
                 {
-                    if (this.Listeners.TryGetValue(Event, out List<Listener<T>> Listeners))
+                    if (this.Listeners.TryGetValue(Event, out List<Listener<TArgument>> Listeners))
                     {
                         SimpleMutex.Lock(EventMutex, () =>
                         {
@@ -116,20 +124,20 @@ namespace EmitterSharp
                 }
             }
 
-            return this;
+            return this as TChildClass;
         }
 
-        public Emitter<E, T> Emit(E Event, [Optional] T Argument)
+        public TChildClass Emit(TEvent Event, [Optional] TArgument Argument)
         {
             if (Event != null)
             {
-                if (this.Listeners.TryGetValue(Event, out List<Listener<T>> Listeners))
+                if (this.Listeners.TryGetValue(Event, out List<Listener<TArgument>> Listeners))
                 {
                     SimpleMutex.Lock(EventMutex, () =>
                     {
                         for (int i = 0; i < Listeners.Count; i++)
                         {
-                            Listener<T> Listener = Listeners[i];
+                            Listener<TArgument> Listener = Listeners[i];
 
                             if (Listener.Once)
                             {
@@ -142,18 +150,18 @@ namespace EmitterSharp
                 }
             }
 
-            return this;
+            return this as TChildClass;
         }
 
-        public List<Delegate> GetListenerList(E Event)
+        public List<Delegate> GetListenerList(TEvent Event)
         {
             List<Delegate> Result = new List<Delegate>();
 
-            if (Event != null && this.Listeners.TryGetValue(Event, out List<Listener<T>> Listeners))
+            if (Event != null && this.Listeners.TryGetValue(Event, out List<Listener<TArgument>> Listeners))
             {
                 SimpleMutex.Lock(EventMutex, () =>
                 {
-                    foreach (Listener<T> Listener in Listeners)
+                    foreach (Listener<TArgument> Listener in Listeners)
                     {
                         Result.Add(Listener.Callback);
                     }
@@ -163,9 +171,9 @@ namespace EmitterSharp
             return Result;
         }
 
-        public int GetListenerCount(E Event)
+        public int GetListenerCount(TEvent Event)
         {
-            if (this.Listeners.TryGetValue(Event, out List<Listener<T>> Listeners))
+            if (this.Listeners.TryGetValue(Event, out List<Listener<TArgument>> Listeners))
             {
                 return Listeners.Count;
             }
@@ -173,7 +181,7 @@ namespace EmitterSharp
             return 0;
         }
 
-        public bool HasListener(E Event)
+        public bool HasListener(TEvent Event)
         {
             return Event != null && GetListenerCount(Event) > 0;
         }

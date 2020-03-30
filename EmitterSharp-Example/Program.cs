@@ -121,7 +121,7 @@ namespace EmitterSharp.Example
             Console.WriteLine("Array ({0}) : {1}", ++countOfArray, ArrayToString(args));
         }
 
-        class ExampleEmitter : Emitter<string, int[]>
+        class ExampleEmitter : Emitter<ExampleEmitter, string, int[]>
         {
 
         }
