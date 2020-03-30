@@ -3,12 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace EmitterSharp
 {
-    internal class Listener<T>
+    internal class Listener<TArgument>
     {
         public Delegate Callback { get; private set; }
         public bool Once { get; private set; }
 
-        internal Listener(Action<T> Callback, bool Once)
+        internal Listener(Action<TArgument> Callback, bool Once)
         {
             Initialize(Callback, Once);
         }
@@ -24,15 +24,15 @@ namespace EmitterSharp
             this.Once = Once;
         }
 
-        public void Invoke([Optional] T Argument)
+        public void Invoke([Optional] TArgument Argument)
         {
-            bool IsGenericAction = Callback is Action<T>;
+            bool IsGenericAction = Callback is Action<TArgument>;
 
             if (IsGenericAction || Callback is Action)
             {
                 if (IsGenericAction)
                 {
-                    (Callback as Action<T>).Invoke(Argument);
+                    (Callback as Action<TArgument>).Invoke(Argument);
                 }
                 else
                 {
@@ -43,9 +43,9 @@ namespace EmitterSharp
 
         public override bool Equals(object Object)
         {
-            if (Object is Listener<T>)
+            if (Object is Listener<TArgument>)
             {
-                Listener<T> Temp = Object as Listener<T>;
+                Listener<TArgument> Temp = Object as Listener<TArgument>;
 
                 return Once.Equals(Temp.Once) && Callback.Equals(Temp.Callback);
             }
