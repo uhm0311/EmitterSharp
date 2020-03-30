@@ -14,7 +14,7 @@ using EmitterSharp;
 
 ## Inheritance ##
 ```csharp
-class ExampleEmitter : Emitter<string, object>
+class ExampleEmitter : Emitter<ExampleEmitter, string, object>
 {
   ...
 }
@@ -22,11 +22,12 @@ class ExampleEmitter : Emitter<string, object>
 
 ### Emitter<E, T> ###
 ```csharp
-public abstract class Emitter<E, T>
+public abstract class Emitter<TChildClass, TEvent, TArgument>
 ```
 
-- The first generic type is **a type of event**.
-- The second generic type is **a type of argument in callback**.
+- The first generic type is **a type of class that inherits Emitter**. This is used for chaining.
+- The second generic type is **a type of event**.
+- The third generic type is **a type of argument in callback**.
 
 ## Listener ##
 ```csharp
@@ -74,9 +75,9 @@ emitter.Emit("custom event", 30); // Emit with argument.
 
 ### Emit without argument ###
 - When `Emitter.Emit` is called only with event, default value of argument is always `0`.
-- If `T` is `bool`, default value of argument is `false` since it's defined as `0`.
-- If `T` is `string`, default value of argument is `null` since it's a reference to address `0`.
-- If `T` is `IntPtr`, default value of argument is `IntPtr.Zero` that is defined as `null` reference.
+- If `TArgument` is `bool`, default value of argument is `false` since it's defined as `0`.
+- If `TArgument` is `string`, default value of argument is `null` since it's a reference to address `0`.
+- If `TArgument` is `IntPtr`, default value of argument is `IntPtr.Zero` that is defined as `null` reference.
 
 # Maintenance
 Welcome to report issue or create pull request. I will check it happily.
