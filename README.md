@@ -14,7 +14,7 @@ using EmitterSharp;
 
 ## Inheritance ##
 ```csharp
-class ExampleEmitter : Emitter<string, object>
+class ExampleEmitter : Emitter<ExampleEmitter, string, object>
 {
   ...
 }
@@ -22,11 +22,12 @@ class ExampleEmitter : Emitter<string, object>
 
 ### Emitter<E, T> ###
 ```csharp
-public abstract class Emitter<E, T>
+public abstract class Emitter<TChildClass, TEvent, TArgument>
 ```
 
-- The first generic type is **a type of event**.
-- The second generic type is **a type of argument in callback**.
+- The first generic type is **a type of class that inherits Emitter**. This is used for chaining.
+- The second generic type is **a type of event**.
+- The third generic type is **a type of argument in callback**.
 
 ## Listener ##
 ```csharp
