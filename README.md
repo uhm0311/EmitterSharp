@@ -20,7 +20,7 @@ class ExampleEmitter : Emitter<ExampleEmitter, string, object>
 }
 ```
 
-### Emitter<E, T> ###
+### Emitter<TChildClass, TEvent, TArgument> ###
 ```csharp
 public abstract class Emitter<TChildClass, TEvent, TArgument>
 ```
