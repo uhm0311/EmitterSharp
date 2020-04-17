@@ -16,7 +16,7 @@ namespace EmitterSharp
 
         protected Emitter()
         {
-            if (!typeof(TChildClass).Equals(GetType()))
+            if (!(this is TChildClass))
             {
                 throw new ArgumentException(string.Format(@"'{0}' does not match with '{1}'.", GetType().Name, typeof(TChildClass).Name));
             }
