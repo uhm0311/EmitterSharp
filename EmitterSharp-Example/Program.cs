@@ -14,7 +14,7 @@ namespace EmitterSharp.Example
 
         static void Main(string[] args)
         {
-            ExampleEmitter emitter = new ExampleEmitter();
+            ExampleEmitter emitter = new RealExampleEmitter();
             emitter.On("9001", ItsOverNineThousands); // Count of event 9001 will be 1 and 3 in here.
 
             emitter.Once("9001", () => // Listener without argument.
@@ -121,7 +121,15 @@ namespace EmitterSharp.Example
             Console.WriteLine("Array ({0}) : {1}", ++countOfArray, ArrayToString(args));
         }
 
-        class ExampleEmitter : Emitter<ExampleEmitter, string, int[]>
+        abstract class ExampleEmitter : Emitter<ExampleEmitter, string, int[]>
+        {
+            protected ExampleEmitter()
+            {
+
+            }
+        }
+
+        class RealExampleEmitter : ExampleEmitter
         {
 
         }
