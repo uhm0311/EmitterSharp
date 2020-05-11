@@ -83,7 +83,7 @@ emitter.Emit("custom event", 30); // Emit with argument.
 Welcome to report issue or create pull request. I will check it happily.
 
 # Dependencies
-- [SimpleThreadMonitor v1.0.2](https://github.com/uhm0311/SimpleThreadMonitor)
+- [SimpleThreadMonitor v1.0.2.1](https://github.com/uhm0311/SimpleThreadMonitor)
 
 # License
 `EmitterSharp` is under [The MIT License](https://github.com/uhm0311/EmitterSharp/blob/master/LICENSE).

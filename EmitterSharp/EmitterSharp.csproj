@@ -1,28 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-  <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net40;netstandard2.0</TargetFrameworks>
-  <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
-  <RootNamespace>EmitterSharp</RootNamespace>
+    <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net40;netstandard2.0;netcoreapp2.0;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
+    <RootNamespace>EmitterSharp</RootNamespace>
     <AssemblyName>EmitterSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
-  <Authors>uhm0311</Authors>
-  <Company>uhm0311</Company>
-  <Title>Emitter</Title>
-  <Copyright>Copyright (c) 2020 uhm0311</Copyright>
-  <Description>C# implementation of Emitter in JavaScript module. See https://github.com/component/emitter for details.</Description>
-  <PackageId>EmitterSharp</PackageId>
+    <Authors>uhm0311</Authors>
+    <Company>uhm0311</Company>
+    <Title>Emitter</Title>
+    <Copyright>Copyright (c) 2020 uhm0311</Copyright>
+    <Description>C# implementation of Emitter in JavaScript module. See https://github.com/component/emitter for details.</Description>
+    <PackageId>EmitterSharp</PackageId>
     <PackageTags>Emitter</PackageTags>
     <PackageProjectUrl>https://github.com/uhm0311/EmitterSharp</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/uhm0311/EmitterSharp.git</RepositoryUrl>
-  <MinClientVersion>2.12</MinClientVersion>
-  <PackageVersion>1.1.1</PackageVersion>
-  <PackageReleaseNotes>Fix bug that a class that is inherited from TChildClass cannot be initiated.</PackageReleaseNotes>
+    <MinClientVersion>2.12</MinClientVersion>
+    <PackageVersion>1.1.1.1</PackageVersion>
+    <PackageReleaseNotes>Add .Net core 2.0, 3.0 support.</PackageReleaseNotes>
+    <PackageOutputPath>../nuget</PackageOutputPath>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SimpleThreadMonitor" Version="1.0.2" />
+    <PackageReference Include="SimpleThreadMonitor" Version="1.0.2.1" />
   </ItemGroup>
 </Project>
